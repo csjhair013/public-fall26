@@ -1,24 +1,26 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "Fall 2026 Project",
-  "main": "app.js",
+  "description": "JobTrack Express Backend",
+  "main": "server.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon app.js"
+    "dev": "nodemon server.js",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
-    "dotenv": "^18.0.4",
+    "dotenv": "^18.0.5",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
-    "mysql2": "^3.24.4",
-    "nodemailer": "^10.0.13",
+    "mysql2": "^3.24.5",
+    "nodemailer": "^10.0.14"
+  },
+  "keywords": [],
+  "devDependencies": {
     "nodemon": "^3.1.14"
   }
 }
