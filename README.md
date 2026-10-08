@@ -1,2 +1,1 @@
-# public-fall26
-Public repo for Fall 2026
+# fall26-csjhair013
