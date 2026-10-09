@@ -2,7 +2,7 @@ JobTrack
 
 Julia Hairston
 
-Fall 2026
+CS 418 - Fall 2026
 
 Milestone 1
 
