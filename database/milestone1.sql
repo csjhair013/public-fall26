@@ -19,7 +19,7 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-// Milestone 2: Main job application resource
+-- Milestone 2: Main job application resource
 CREATE TABLE IF NOT EXISTS job_applications(
     application_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
