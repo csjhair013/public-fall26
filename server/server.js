@@ -5,6 +5,8 @@ import pool from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import transporter from "./config/email.js";
 import session from "express-session";
+import applicationRoutes from "./routes/applicationRoutes.js";
+
 
 dotenv.config();
 
@@ -36,6 +38,7 @@ app.use(
 );
 
 app.use("/api/auth", authRoutes);
+app.use("/api/applications", applicationRoutes);
 
 // Basic test route.
 app.get("/api/health", (req, res) => {
