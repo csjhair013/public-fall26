@@ -5,7 +5,7 @@ import authMiddleware from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 const allowedStatuses = [
-    "Intersted",
+    "Interested",
     "Applied",
     "Interviewing",
     "Offer",
@@ -129,11 +129,11 @@ router.use(authMiddleware);
 // List only the logged-in user's applications.
 router.get("/", async (req, res) => {
     try {
-        const userId = req.session.user_id;
+        const userId = req.session.user.user_id;
 
         const [applications] = await pool.execute(
             `SELECT * 
-            FROM applications 
+            FROM job_applications
             WHERE user_id = ? 
             ORDER BY created_at DESC`,
             [userId]
