@@ -29,13 +29,20 @@ function isValidId(id) {
 
 // Validate application fields sent by the client.
 function validateApplication(body){
-    const{
+    if (
+        body === null ||
+        typeof body !== "object" ||
+        Array.isArray(body)
+    ) {
+        return "Request body must contain valid application data.";
+    }
+    // Extract the fields we need to validate.
+    const {
         company_name,
         job_title,
         application_status,
         job_type,
         application_date,
-
     } = body;
 
     if (
@@ -43,7 +50,7 @@ function validateApplication(body){
         !company_name.trim() ||
         company_name.trim().length > 150
     ) {
-        return "Company name is required and must be 150 characters or fewer.";
+        return "Company name is required and must be 150 charactes or less.";
     }
 
     if (
@@ -51,7 +58,7 @@ function validateApplication(body){
         !job_title.trim() ||
         job_title.trim().length > 150
     ) {
-        return "Job title is required and must be 150 characters or fewer.";
+        return "Job title is required and must be 150 characters or less.";
     }
 
     if (
@@ -61,7 +68,8 @@ function validateApplication(body){
         return "Please select a valid application status.";
     }
 
-    if ( job_type != null &&
+    if (
+        job_type !== null &&
         job_type !== "" &&
         !allowedJobTypes.includes(job_type)
     ) {
@@ -73,14 +81,14 @@ function validateApplication(body){
             typeof application_date !== "string" ||
             !/^\d{4}-\d{2}-\d{2}$/.test(application_date)
         ) {
-            return "Application date must be use YYYY-MM-DD format.";
+            return "Application date must use YYYY-MM-DD format.";
         }
 
         const date = new Date(`${application_date}T00:00:00Z`);
 
-        if (
+        if(
             Number.isNaN(date.getTime()) ||
-            date.toISOString().slice(0,10) !== application_date
+            date.toISOString().slice(0, 10) !== application_date
         ) {
             return "Please provide a valid application date.";
         }
@@ -96,7 +104,7 @@ function validateApplication(body){
         body.job_location &&
         body.job_location.trim().length > 150
     ) {
-        return "Job location must be 150 characters or fewer.";
+        return "Job location must be 150 characters or less.";
     }
 
     if (body.job_url && body.job_url.trim()) {
@@ -322,12 +330,20 @@ router.put("/:id", async (req, res) => {
         );
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Job application not found.",
-            });
-        }
+            const [existingApplications] = await pool.execute(
+                `SELECT application_id
+                 FROM job_applications
+                 WHERE application_id = ? AND user_id = ?`,
+                [Number(req.params.id), req.session.user.user_id]
+            );
 
+            if (existingApplications.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Job application not found.",
+                });
+            }
+        }
         const [applications] = await pool.execute(
             `SELECT *
              FROM job_applications
