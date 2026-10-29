@@ -251,6 +251,21 @@ router.post("/", async (req, res) => {
             ]
         );
 
+        // Record the creation in the application's activity history.
+        await pool.execute(
+            `INSERT INTO application_activities (
+                application_id,
+                activity_type,
+                description
+            )
+            VALUES (?, ?, ?)`,
+            [
+                result.insertId,
+                "Created",
+                "Job application created.",
+            ]
+        );
+
         const [applications] = await pool.execute(
             `SELECT *
              FROM job_applications
@@ -344,6 +359,20 @@ router.put("/:id", async (req, res) => {
                 });
             }
         }
+        // Record the update in the application's activity history.
+        await pool.execute(
+        `INSERT INTO application_activities (
+            application_id,
+            activity_type,
+            description
+        )
+        VALUES (?, ?, ?)`,
+        [
+            req.params.id,
+            "Updated",
+            "Job application updated.",
+        ]
+);
         const [applications] = await pool.execute(
             `SELECT *
              FROM job_applications

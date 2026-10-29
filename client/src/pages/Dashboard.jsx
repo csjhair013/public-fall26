@@ -15,6 +15,226 @@ const emptyApplication = {
     notes: "",
 };
 
+const applicationStatuses = [
+    "Interested",
+    "Applied",
+    "Interviewing",
+    "Offer",
+    "Rejected",
+    "Withdrawn",
+];
+
+const jobTypes = [
+    "Internship",
+    "Full-time",
+    "Part-time",
+    "Contract",
+    "Temporary",
+    "Other",
+];
+
+function getApplicationId(application) {
+    return application.id ?? application.application_id;
+}
+
+const styles = {
+    page: {
+        minHeight: "100vh",
+        backgroundColor: "#6b9dea",
+        padding: "30px 20px",
+        fontFamily: "Arial, sans-serif",
+        color: "#243247",
+    },
+    container: {
+        maxWidth: "1100px",
+        margin: "0 auto",
+    },
+    header: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: "15px",
+        marginBottom: "25px",
+    },
+    heading: {
+        margin: "0 0 8px",
+        fontSize: "30px",
+    },
+    subtitle: {
+        margin: 0,
+        color: "#64748b",
+    },
+    button: {
+        padding: "10px 16px",
+        border: "none",
+        borderRadius: "6px",
+        cursor: "pointer",
+        fontSize: "14px",
+        fontWeight: "bold",
+    },
+    logoutButton: {
+        backgroundColor: "#dc2626",
+        color: "#ffffff",
+    },
+    panel: {
+        backgroundColor: "#94eec4",
+        padding: "24px",
+        borderRadius: "10px",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
+        marginBottom: "25px",
+    },
+    sectionHeading: {
+        marginTop: 0,
+        marginBottom: "20px",
+        fontSize: "22px",
+    },
+    formGrid: {
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+        gap: "18px",
+    },
+    field: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "7px",
+        fontSize: "14px",
+        fontWeight: "bold",
+    },
+    input: {
+        width: "100%",
+        boxSizing: "border-box",
+        padding: "11px",
+        border: "1px solid #cbd5e1",
+        borderRadius: "6px",
+        fontSize: "14px",
+        fontFamily: "Arial, sans-serif",
+        fontWeight: "normal",
+        color: "#243247",
+        backgroundColor: "#ffffff",
+        WebkitTextFillColor: "#243247",
+        opacity: 1,
+    },
+
+    select: {
+        width: "100%",
+        boxSizing: "border-box",
+        padding: "11px",
+        border: "1px solid #cbd5e1",
+        borderRadius: "6px",
+        fontSize: "14px",
+        fontFamily: "Arial, sans-serif",
+        fontWeight: "normal",
+        color: "#243247",
+        backgroundColor: "#ffffff",
+        WebkitTextFillColor: "#243247",
+        opacity: 1,
+    },
+
+    textarea: {
+        width: "100%",
+        boxSizing: "border-box",
+        minHeight: "100px",
+        padding: "11px",
+        border: "1px solid #cbd5e1",
+        borderRadius: "6px",
+        fontSize: "14px",
+        fontFamily: "Arial, sans-serif",
+        fontWeight: "normal",
+        color: "#243247",
+        backgroundColor: "#ffffff",
+        WebkitTextFillColor: "#243247",
+        opacity: 1,
+        resize: "vertical",
+    },
+    fullWidth: {
+        gridColumn: "1 / -1",
+    },
+    formButtons: {
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "10px",
+        marginTop: "20px",
+    },
+    primaryButton: {
+        backgroundColor: "#2563eb",
+        color: "#ffffff",
+    },
+    secondaryButton: {
+        backgroundColor: "#e2e8f0",
+        color: "#243247",
+    },
+    editButton: {
+        backgroundColor: "#dbeafe",
+        color: "#1d4ed8",
+    },
+    deleteButton: {
+        backgroundColor: "#fee2e2",
+        color: "#b91c1c",
+    },
+    message: {
+        padding: "12px 15px",
+        borderRadius: "6px",
+        marginBottom: "18px",
+    },
+    error: {
+        backgroundColor: "#fee2e2",
+        color: "#991b1b",
+    },
+    success: {
+        backgroundColor: "#dcfce7",
+        color: "#166534",
+    },
+    applicationCard: {
+        border: "1px solid #e2e8f0",
+        borderRadius: "8px",
+        padding: "20px",
+        marginBottom: "15px",
+        overflowWrap: "anywhere",
+    },
+    applicationHeader: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        flexWrap: "wrap",
+        gap: "12px",
+    },
+    applicationTitle: {
+        margin: "0 0 6px",
+        fontSize: "19px",
+    },
+    company: {
+        margin: 0,
+        color: "#64748b",
+    },
+    details: {
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+        gap: "12px",
+        marginTop: "18px",
+        fontSize: "14px",
+    },
+    detail: {
+        margin: 0,
+        lineHeight: "1.6",
+        overflowWrap: "anywhere",
+    },
+    badge: {
+        display: "inline-block",
+        padding: "5px 9px",
+        borderRadius: "20px",
+        backgroundColor: "#e0e7ff",
+        color: "#3730a3",
+        fontSize: "12px",
+        fontWeight: "bold",
+    },
+    empty: {
+        textAlign: "center",
+        padding: "30px 10px",
+        color: "#64748b",
+    },
+};
+
 function Dashboard() {
     const navigate = useNavigate();
 
@@ -27,113 +247,173 @@ function Dashboard() {
     const [form, setForm] = useState(emptyApplication);
     const [editingId, setEditingId] = useState(null);
 
-    // Load the logged-in user and their applications.
+    // Check the logged-in user and load their applications.
     useEffect(() => {
-        const loadDashboard = async () => {
+        async function loadDashboard() {
             try {
                 const userResponse = await fetch(`${API_URL}/auth/me`, {
+                    method: "GET",
                     credentials: "include",
                 });
-
-                const userData = await userResponse.json();
 
                 if (!userResponse.ok) {
                     navigate("/unauthorized");
                     return;
                 }
 
-                setUser(userData.user);
+                const userData = await userResponse.json();
+                setUser(userData.user ?? userData);
 
                 const applicationsResponse = await fetch(
                     `${API_URL}/applications`,
-                    { credentials: "include" }
+                    {
+                        method: "GET",
+                        credentials: "include",
+                    }
                 );
 
-                const applicationsData = await applicationsResponse.json();
+                const applicationsData =
+                    await applicationsResponse.json();
 
                 if (!applicationsResponse.ok) {
                     throw new Error(
                         applicationsData.message ||
-                        "Unable to load your applications."
+                            "Unable to load applications."
                     );
                 }
 
-                setApplications(applicationsData.applications || []);
+                setApplications(
+                    Array.isArray(applicationsData)
+                        ? applicationsData
+                        : applicationsData.applications ?? []
+                );
             } catch (err) {
-                console.error("Dashboard error:", err);
-                setError(err.message || "Unable to connect to the server.");
+                setError(
+                    err.message || "Unable to load the dashboard."
+                );
             } finally {
                 setLoading(false);
             }
-        };
+        }
 
         loadDashboard();
     }, [navigate]);
 
-    // Update a form field when the user types.
-    const handleChange = (event) => {
+    // Update the matching form field whenever a user types or selects an option.
+    function handleChange(event) {
         const { name, value } = event.target;
 
         setForm((previousForm) => ({
             ...previousForm,
             [name]: value,
         }));
-    };
+    }
 
-    // Clear the form and exit edit mode.
-    const resetForm = () => {
+    // Clear the form and exit editing mode.
+    function resetForm() {
         setForm({ ...emptyApplication });
         setEditingId(null);
         setError("");
         setSuccess("");
-    };
+    }
 
-    // Create a new application or save changes to an existing one.
-    const handleSubmit = async (event) => {
+    // Create a new application or update an existing one.
+    async function handleSubmit(event) {
         event.preventDefault();
         setError("");
         setSuccess("");
+
+        // Reject required fields that contain only spaces.
+        if (
+            !form.company_name.trim() ||
+            !form.job_title.trim()
+        ) {
+            setError(
+                "Company name and job title are required."
+            );
+            return;
+        }
+
+        // Validate the optional job posting URL.
+        if (form.job_url.trim()) {
+            try {
+                const url = new URL(form.job_url.trim());
+
+                if (
+                    !["http:", "https:"].includes(url.protocol)
+                ) {
+                    setError(
+                        "Job URL must start with HTTP or HTTPS."
+                    );
+                    return;
+                }
+            } catch {
+                setError(
+                    "Please enter a valid job posting URL."
+                );
+                return;
+            }
+        }
+
         setSaving(true);
 
         try {
             const isEditing = editingId !== null;
 
-            const response = await fetch(
-                isEditing
-                    ? `${API_URL}/applications/${editingId}`
-                    : `${API_URL}/applications`,
-                {
-                    method: isEditing ? "PUT" : "POST",
-                    credentials: "include",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(form),
-                }
-            );
+            const endpoint = isEditing
+                ? `${API_URL}/applications/${editingId}`
+                : `${API_URL}/applications`;
+
+            const response = await fetch(endpoint, {
+                method: isEditing ? "PUT" : "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    ...form,
+                    company_name: form.company_name.trim(),
+                    job_title: form.job_title.trim(),
+                    job_location: form.job_location.trim(),
+                    job_url: form.job_url.trim(),
+                    notes: form.notes.trim(),
+                }),
+            });
 
             const data = await response.json();
 
             if (!response.ok) {
                 throw new Error(
-                    data.message || "Unable to save the application."
+                    data.message ||
+                        "Unable to save the application."
                 );
             }
 
             // Refresh the list so it reflects the database.
-            const listResponse = await fetch(`${API_URL}/applications`, {
-                credentials: "include",
-            });
+            const applicationsResponse = await fetch(
+                `${API_URL}/applications`,
+                {
+                    method: "GET",
+                    credentials: "include",
+                }
+            );
 
-            const listData = await listResponse.json();
+            const applicationsData =
+                await applicationsResponse.json();
 
-            if (!listResponse.ok) {
+            if (!applicationsResponse.ok) {
                 throw new Error(
-                    listData.message || "Saved, but unable to refresh the list."
+                    applicationsData.message ||
+                        "Saved the application, but could not refresh the list."
                 );
             }
 
-            setApplications(listData.applications || []);
+            setApplications(
+                Array.isArray(applicationsData)
+                    ? applicationsData
+                    : applicationsData.applications ?? []
+            );
+
             setSuccess(
                 isEditing
                     ? "Application updated successfully."
@@ -143,37 +423,58 @@ function Dashboard() {
             setForm({ ...emptyApplication });
             setEditingId(null);
         } catch (err) {
-            console.error("Save application error:", err);
-            setError(err.message || "Unable to connect to the server.");
+            setError(
+                err.message || "Unable to save the application."
+            );
         } finally {
             setSaving(false);
         }
-    };
+    }
 
-    // Put the selected application into the form.
-    const handleEdit = (application) => {
-        setEditingId(application.application_id);
+    // Copy a selected application's information into the form.
+    function handleEdit(application) {
+        const applicationId = getApplicationId(application);
+
+    if (
+        applicationId == null ||
+        !/^\d+$/.test(String(applicationId)) ||
+        Number(applicationId) <= 0
+        ) {
+        
+        console.error("Invalid application record:", application);
+        
+        setError("Could not find a valid ID for this application.");
+        
+        return;
+        }
+
+        setEditingId(Number(applicationId));
 
         setForm({
-            company_name: application.company_name || "",
-            job_title: application.job_title || "",
-            job_location: application.job_location || "",
-            job_type: application.job_type || "Internship",
-            application_status: application.application_status || "Interested",
+            company_name: application.company_name ?? "",
+            job_title: application.job_title ?? "",
+            job_location: application.job_location ?? "",
+            job_type: application.job_type ?? "Internship",
+            application_status:
+                application.application_status ?? "Interested",
             application_date: application.application_date
                 ? String(application.application_date).slice(0, 10)
                 : "",
-            job_url: application.job_url || "",
-            notes: application.notes || "",
+            job_url: application.job_url ?? "",
+            notes: application.notes ?? "",
         });
 
         setError("");
         setSuccess("");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    };
 
-    // Delete only the selected application.
-    const handleDelete = async (applicationId) => {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        });
+    }
+
+    // Delete an application after the user confirms.
+    async function handleDelete(id) {
         const confirmed = window.confirm(
             "Are you sure you want to delete this application?"
         );
@@ -182,12 +483,29 @@ function Dashboard() {
             return;
         }
 
+        const applicationId =
+            typeof id === "object" && id !== null
+                ? getApplicationId(id)
+                : id;
+
+        if (
+            applicationId == null ||
+            !/^\d+$/.test(String(applicationId)) ||
+            Number(applicationId) <= 0
+        ) {
+            console.error("Invalid application ID:", id);
+            setError("Could not find a valid ID for this application.");
+            return;
+        }
+
+        const numericId = Number(applicationId);
+
         setError("");
         setSuccess("");
 
         try {
             const response = await fetch(
-                `${API_URL}/applications/${applicationId}`,
+                `${API_URL}/applications/${numericId}`,
                 {
                     method: "DELETE",
                     credentials: "include",
@@ -198,374 +516,438 @@ function Dashboard() {
 
             if (!response.ok) {
                 throw new Error(
-                    data.message || "Unable to delete the application."
+                    data.message ||
+                        "Unable to delete the application."
                 );
             }
 
-            setApplications((previous) =>
-                previous.filter(
+            setApplications((previousApplications) =>
+                previousApplications.filter(
                     (application) =>
-                        application.application_id !== applicationId
+                        Number(getApplicationId(application)) !== numericId
                 )
             );
 
-            if (editingId === applicationId) {
-                resetForm();
+            if (Number(editingId) === numericId) {
+                setForm({ ...emptyApplication });
+                setEditingId(null);
             }
 
             setSuccess("Application deleted successfully.");
         } catch (err) {
-            console.error("Delete application error:", err);
-            setError(err.message || "Unable to connect to the server.");
+            setError(
+                err.message || "Unable to delete the application."
+            );
         }
-    };
+    }
 
-    // Log out and return to the login page.
-    const handleLogout = async () => {
+    // End the current session and return to the login page.
+    async function handleLogout() {
         setError("");
+        setSuccess("");
 
         try {
-            const response = await fetch(`${API_URL}/auth/logout`, {
-                method: "POST",
-                credentials: "include",
-            });
+            const response = await fetch(
+                `${API_URL}/auth/logout`,
+                {
+                    method: "POST",
+                    credentials: "include",
+                }
+            );
 
-            if (response.ok) {
-                navigate("/login");
-            } else {
-                setError("Unable to log out.");
+            if (!response.ok) {
+                const data = await response.json();
+
+                throw new Error(
+                    data.message || "Unable to log out."
+                );
             }
+
+            navigate("/login");
         } catch (err) {
-            console.error("Logout error:", err);
-            setError("Unable to connect to the server.");
+            setError(err.message || "Unable to log out.");
         }
-    };
+    }
 
     if (loading) {
-        return <h1>Loading Dashboard...</h1>;
+        return (
+            <main style={styles.page}>
+                <div style={styles.container}>
+                    <p>Loading your JobTrack dashboard...</p>
+                </div>
+            </main>
+        );
     }
 
     return (
         <main style={styles.page}>
-            <header style={styles.header}>
-                <div>
-                    <h1>Welcome to JobTrack!</h1>
-                    <p>Keep track of your job applications in one place.</p>
-                </div>
+            <div style={styles.container}>
+                <header style={styles.header}>
+                    <div>
+                        <h1 style={styles.heading}>
+                            Welcome to JobTrack
+                        </h1>
 
-                <button type="button" onClick={handleLogout}>
-                    Logout
-                </button>
-            </header>
-
-            {user && (
-                <section style={styles.card}>
-                    <h2>Account Information</h2>
-                    <p>
-                        <strong>Name:</strong> {user.first_name}{" "}
-                        {user.last_name}
-                    </p>
-                    <p>
-                        <strong>Email:</strong> {user.email}
-                    </p>
-                    <p>
-                        <strong>Email Verified:</strong>{" "}
-                        {user.email_verified ? "Yes" : "No"}
-                    </p>
-                </section>
-            )}
-
-            {error && (
-                <p role="alert" style={styles.error}>
-                    {error}
-                </p>
-            )}
-
-            {success && (
-                <p role="status" style={styles.success}>
-                    {success}
-                </p>
-            )}
-
-            <section style={styles.card}>
-                <h2>
-                    {editingId !== null
-                        ? "Edit Job Application"
-                        : "Add a Job Application"}
-                </h2>
-
-                <form onSubmit={handleSubmit} style={styles.form}>
-                    <label>
-                        Company Name *
-                        <input
-                            name="company_name"
-                            value={form.company_name}
-                            onChange={handleChange}
-                            required
-                            maxLength={150}
-                        />
-                    </label>
-
-                    <label>
-                        Job Title *
-                        <input
-                            name="job_title"
-                            value={form.job_title}
-                            onChange={handleChange}
-                            required
-                            maxLength={150}
-                        />
-                    </label>
-
-                    <label>
-                        Location
-                        <input
-                            name="job_location"
-                            value={form.job_location}
-                            onChange={handleChange}
-                            maxLength={150}
-                            placeholder="e.g., Norfolk, VA"
-                        />
-                    </label>
-
-                    <label>
-                        Job Type
-                        <select
-                            name="job_type"
-                            value={form.job_type}
-                            onChange={handleChange}
-                        >
-                            <option value="Internship">Internship</option>
-                            <option value="Full-time">Full-time</option>
-                            <option value="Part-time">Part-time</option>
-                            <option value="Contract">Contract</option>
-                            <option value="Temporary">Temporary</option>
-                        </select>
-                    </label>
-
-                    <label>
-                        Application Status
-                        <input
-                            name="application_status"
-                            value={form.application_status}
-                            onChange={handleChange}
-                            required
-                            maxLength={50}
-                            placeholder="e.g., Interested, Applied, Interview"
-                        />
-                    </label>
-
-                    <label>
-                        Application Date
-                        <input
-                            type="date"
-                            name="application_date"
-                            value={form.application_date}
-                            onChange={handleChange}
-                        />
-                    </label>
-
-                    <label style={styles.fullWidth}>
-                        Job Posting URL
-                        <input
-                            type="url"
-                            name="job_url"
-                            value={form.job_url}
-                            onChange={handleChange}
-                            maxLength={2048}
-                            placeholder="https://..."
-                        />
-                    </label>
-
-                    <label style={styles.fullWidth}>
-                        Notes
-                        <textarea
-                            name="notes"
-                            value={form.notes}
-                            onChange={handleChange}
-                            rows={3}
-                            placeholder="Recruiter details, interview notes, or next steps"
-                        />
-                    </label>
-
-                    <div style={styles.actions}>
-                        <button type="submit" disabled={saving}>
-                            {saving
-                                ? "Saving..."
-                                : editingId !== null
-                                  ? "Save Changes"
-                                  : "Add Application"}
-                        </button>
-
-                        {editingId !== null && (
-                            <button
-                                type="button"
-                                onClick={resetForm}
-                                disabled={saving}
-                            >
-                                Cancel Edit
-                            </button>
-                        )}
+                        <p style={styles.subtitle}>
+                            Keep track of your job applications
+                            in one place.
+                        </p>
                     </div>
-                </form>
-            </section>
 
-            <section style={styles.card}>
-                <h2>Your Applications ({applications.length})</h2>
+                    <button
+                        type="button"
+                        style={{
+                            ...styles.button,
+                            ...styles.logoutButton,
+                        }}
+                        onClick={handleLogout}
+                    >
+                        Log Out
+                    </button>
+                </header>
 
-                {applications.length === 0 ? (
-                    <p>
-                        You don't have any applications yet. Use the form above
-                        to add your first one.
-                    </p>
-                ) : (
-                    <div style={styles.applicationList}>
-                        {applications.map((application) => (
-                            <article
-                                key={application.application_id}
-                                style={styles.application}
-                            >
-                                <h3>{application.job_title}</h3>
-                                <p>
-                                    <strong>Company:</strong>{" "}
-                                    {application.company_name}
-                                </p>
+                {user && (
+                    <section style={styles.panel}>
+                        <h2 style={styles.sectionHeading}>
+                            Account Information
+                        </h2>
 
-                                {application.job_location && (
-                                    <p>
-                                        <strong>Location:</strong>{" "}
-                                        {application.job_location}
-                                    </p>
-                                )}
+                        <p>
+                            <strong>Name:</strong>{" "}
+                            {user.name ||
+                                user.full_name ||
+                                [user.first_name, user.last_name]
+                                    .filter(Boolean)
+                                    .join(" ") ||
+                                "Julia Hairston"}
+                        </p>
 
-                                {application.job_type && (
-                                    <p>
-                                        <strong>Job Type:</strong>{" "}
-                                        {application.job_type}
-                                    </p>
-                                )}
+                        <p>
+                            <strong>Email:</strong>{" "}
+                            {user.email || "Not available"}
+                        </p>
+                    </section>
+                )}
 
-                                <p>
-                                    <strong>Status:</strong>{" "}
-                                    {application.application_status}
-                                </p>
+                {error && (
+                    <div
+                        role="alert"
+                        style={{
+                            ...styles.message,
+                            ...styles.error,
+                        }}
+                    >
+                        {error}
+                    </div>
+                )}
 
-                                {application.application_date && (
-                                    <p>
-                                        <strong>Application Date:</strong>{" "}
-                                        {String(
-                                            application.application_date
-                                        ).slice(0, 10)}
-                                    </p>
-                                )}
+                {success && (
+                    <div
+                        role="status"
+                        style={{
+                            ...styles.message,
+                            ...styles.success,
+                        }}
+                    >
+                        {success}
+                    </div>
+                )}
 
-                                {application.job_url && (
-                                    <p>
-                                        <strong>Posting:</strong>{" "}
-                                        <a
-                                            href={application.job_url}
-                                            target="_blank"
-                                            rel="noreferrer"
+                <section style={styles.panel}>
+                    <h2 style={styles.sectionHeading}>
+                        {editingId !== null
+                            ? "Edit Job Application"
+                            : "Add Job Application"}
+                    </h2>
+
+                    <form onSubmit={handleSubmit}>
+                        <div style={styles.formGrid}>
+                            <label style={styles.field}>
+                                Company Name *
+                                <input
+                                    style={styles.select}
+                                    type="text"
+                                    name="company_name"
+                                    value={form.company_name}
+                                    onChange={handleChange}
+                                    maxLength={150}
+                                    required
+                                />
+                            </label>
+
+                            <label style={styles.field}>
+                                Job Title *
+                                <input
+                                    style={styles.input}
+                                    type="text"
+                                    name="job_title"
+                                    value={form.job_title}
+                                    onChange={handleChange}
+                                    maxLength={150}
+                                    required
+                                />
+                            </label>
+
+                            <label style={styles.field}>
+                                Job Location
+                                <input
+                                    style={styles.input}
+                                    type="text"
+                                    name="job_location"
+                                    value={form.job_location}
+                                    onChange={handleChange}
+                                    maxLength={150}
+                                    placeholder="e.g., Norfolk, VA"
+                                />
+                            </label>
+
+                            <label style={styles.field}>
+                                Job Type
+                                <select
+                                    style={styles.input}
+                                    name="job_type"
+                                    value={form.job_type}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    {jobTypes.map((jobType) => (
+                                        <option
+                                            key={jobType}
+                                            value={jobType}
                                         >
-                                            View Job Posting
-                                        </a>
-                                    </p>
-                                )}
+                                            {jobType}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
 
-                                {application.notes && (
-                                    <p>
+                            <label style={styles.field}>
+                                Application Status *
+                                <select
+                                    style={styles.input}
+                                    name="application_status"
+                                    value={form.application_status}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    {applicationStatuses.map(
+                                        (status) => (
+                                            <option
+                                                key={status}
+                                                value={status}
+                                            >
+                                                {status}
+                                            </option>
+                                        )
+                                    )}
+                                </select>
+                            </label>
+
+                            <label style={styles.field}>
+                                Application Date
+                                <input
+                                    style={styles.input}
+                                    type="date"
+                                    name="application_date"
+                                    value={form.application_date}
+                                    onChange={handleChange}
+                                />
+                            </label>
+
+                            <label
+                                style={{
+                                    ...styles.field,
+                                    ...styles.fullWidth,
+                                }}
+                            >
+                                Job Posting URL
+                                <input
+                                    style={styles.input}
+                                    type="url"
+                                    name="job_url"
+                                    value={form.job_url}
+                                    onChange={handleChange}
+                                    maxLength={2048}
+                                    placeholder="https://example.com/job"
+                                />
+                            </label>
+
+                            <label
+                                style={{
+                                    ...styles.field,
+                                    ...styles.fullWidth,
+                                }}
+                            >
+                                Notes
+                                <textarea
+                                    style={styles.textarea}
+                                    name="notes"
+                                    value={form.notes}
+                                    onChange={handleChange}
+                                    placeholder="Add interview details, contacts, or reminders..."
+                                />
+                            </label>
+                        </div>
+
+                        <div style={styles.formButtons}>
+                            <button
+                                type="submit"
+                                disabled={saving}
+                                style={{
+                                    ...styles.button,
+                                    ...styles.primaryButton,
+                                    opacity: saving ? 0.7 : 1,
+                                }}
+                            >
+                                {saving
+                                    ? "Saving..."
+                                    : editingId !== null
+                                      ? "Update Application"
+                                      : "Add Application"}
+                            </button>
+
+                            {editingId !== null && (
+                                <button
+                                    type="button"
+                                    style={{
+                                        ...styles.button,
+                                        ...styles.secondaryButton,
+                                    }}
+                                    onClick={resetForm}
+                                    disabled={saving}
+                                >
+                                    Cancel Edit
+                                </button>
+                            )}
+                        </div>
+                    </form>
+                </section>
+
+                <section style={styles.panel}>
+                    <h2 style={styles.sectionHeading}>
+                        My Applications ({applications.length})
+                    </h2>
+
+                    {applications.length === 0 ? (
+                        <div style={styles.empty}>
+                            <p>
+                                You have no job applications yet.
+                            </p>
+                            <p>
+                                Use the form above to add your first
+                                application.
+                            </p>
+                        </div>
+                    ) : (
+                        applications.map((application) => (
+                            <article
+                                key={getApplicationId(application)}
+                                style={styles.applicationCard}
+                            >
+                                <div
+                                    style={styles.applicationHeader}
+                                >
+                                    <div>
+                                        <h3
+                                            style={styles.applicationTitle}
+                                        >
+                                            {application.job_title}
+                                        </h3>
+
+                                        <p style={styles.company}>
+                                            {application.company_name}
+                                        </p>
+                                    </div>
+
+                                    <span style={styles.badge}>
+                                        {application.application_status}
+                                    </span>
+                                </div>
+
+                                <div style={styles.details}>
+                                    <p style={styles.detail}>
+                                        <strong>Location:</strong>{" "}
+                                        {application.job_location ||
+                                            "Not specified"}
+                                    </p>
+
+                                    <p style={styles.detail}>
+                                        <strong>Job Type:</strong>{" "}
+                                        {application.job_type ||
+                                            "Not specified"}
+                                    </p>
+
+                                    <p style={styles.detail}>
+                                        <strong>Application Date:</strong>{" "}
+                                        {application.application_date
+                                            ? String(
+                                                  application.application_date
+                                              ).slice(0, 10)
+                                            : "Not specified"}
+                                    </p>
+
+                                    <p style={styles.detail}>
+                                        <strong>Job URL:</strong>{" "}
+                                        {application.job_url ? (
+                                            <a
+                                                href={application.job_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                View Job Posting
+                                            </a>
+                                        ) : (
+                                            "Not provided"
+                                        )}
+                                    </p>
+
+                                    <p
+                                        style={{
+                                            ...styles.detail,
+                                            ...styles.fullWidth,
+                                        }}
+                                    >
                                         <strong>Notes:</strong>{" "}
-                                        {application.notes}
+                                        {application.notes ||
+                                            "No notes"}
                                     </p>
-                                )}
+                                </div>
 
-                                <div style={styles.actions}>
+                                <div style={styles.formButtons}>
                                     <button
                                         type="button"
-                                        onClick={() => handleEdit(application)}
+                                        style={{
+                                            ...styles.button,
+                                            ...styles.editButton,
+                                        }}
+                                        onClick={() =>
+                                            handleEdit(application)
+                                        }
                                     >
                                         Edit
                                     </button>
 
                                     <button
                                         type="button"
+                                        style={{
+                                            ...styles.button,
+                                            ...styles.deleteButton,
+                                        }}
                                         onClick={() =>
-                                            handleDelete(
-                                                application.application_id
-                                            )
+                                            handleDelete(getApplicationId(application))
                                         }
                                     >
                                         Delete
                                     </button>
                                 </div>
                             </article>
-                        ))}
-                    </div>
-                )}
-            </section>
+                        ))
+                    )}
+                </section>
+            </div>
         </main>
     );
 }
 
-const styles = {
-    page: {
-        maxWidth: "1000px",
-        margin: "0 auto",
-        padding: "24px",
-        fontFamily: "Arial, sans-serif",
-    },
-    header: {
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: "16px",
-        marginBottom: "24px",
-    },
-    card: {
-        border: "1px solid #4952f4",
-        borderRadius: "8px",
-        padding: "20px",
-        marginBottom: "24px",
-        backgroundColor: "#1f1045",
-    },
-    form: {
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-        gap: "16px",
-    },
-    fullWidth: {
-        gridColumn: "1 / -1",
-    },
-    actions: {
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "10px",
-        marginTop: "8px",
-    },
-    applicationList: {
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-        gap: "16px",
-    },
-    application: {
-        border: "1px solid #3d1eec",
-        borderRadius: "8px",
-        padding: "16px",
-        overflowWrap: "anywhere",
-    },
-    error: {
-        color: "#b42318",
-        backgroundColor: "#fef3f2",
-        padding: "12px",
-        borderRadius: "6px",
-    },
-    success: {
-        color: "#067647",
-        backgroundColor: "#ecfdf3",
-        padding: "12px",
-        borderRadius: "6px",
-    },
-};
-
 export default Dashboard;
+
