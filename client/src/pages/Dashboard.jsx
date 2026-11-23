@@ -571,6 +571,58 @@ function Dashboard() {
             setError(err.message || "Unable to log out.");
         }
     }
+    // Filter and sort applications based on the selected controls.
+    const filteredApplications = applications
+        .filter((application) => {
+            // Search company name, job title, and locaiton.
+            const search = searchTerm.toLowerCase().trim();
+        
+            const matchesSearch = 
+                application.company_name?.toLowerCase().includes(search) ||
+                application.job_title?.toLowerCase().includes(search) ||
+                application.job_location?.toLowerCase().includes(search);
+            
+            // Filter by application status.
+            const matchesStatus = 
+                statusFilter === "All" ||
+                application.application_status === statusFilter;
+
+            return matchesSearch && matchesStatus;
+        })
+        .sort((a, b) => {
+            //Sort alphabetically by company name.
+            if (sortOrder === "company-asc") {
+                return (a.company_name || "").localeCompare(
+                    b.company_name || ""
+                );
+            }
+
+            if (sortOrder === "company-desc") {
+                return (b.company_name || "").localeCompare(
+                    a.company_name || ""
+                );
+            }
+
+            // Sort by application date.
+            const dateA = a.application_date
+                ? new Date(a.application_date).getTime()
+                : null;
+
+            const dateB = b.application_date
+                ? new Date(b.application_date).getTime()
+                : null;
+        
+        // Keep applications without dates at the bottom.
+        if (dateA === null) return 1;
+        if (dateB === null) return -1;
+
+        if (sortOrder === "oldest") {
+            return dateA - dateB;
+        }
+
+        // Default: newest applications first.
+        return dateB - dateA;
+    });
 
     if (loading) {
         return (
@@ -831,19 +883,103 @@ function Dashboard() {
                         My Applications ({applications.length})
                     </h2>
 
-                    {applications.length === 0 ? (
+                    {/* Search, filter, and sorting controls */}
+                    <div
+                        style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                            gap: "15px",
+                            marginBottom: "25px",
+                        }}
+                    >
+                        <label style={styles.field}>
+                            Search Applications
+                            <input
+                                type="text"
+                                style={styles.input}
+                                placeholder="Search by company, job title, or location..."
+                                value={searchTerm}
+                                onChange={(event) =>
+                                    setSearchTerm(event.target.value)
+                                }
+                            />
+                        </label>
+
+                        <label style={styles.field}>
+                            Filter by Status
+                            <select
+                                style={styles.select}
+                                value={statusFilter}
+                                onChange={(event) =>
+                                    setStatusFilter(event.target.value)
+                                }
+
+                            >
+                                <option value="All">All Statuses</option>
+                                
+                                {applicationStatuses.map((status) => (
+                                    <option key={status} value={status}>
+                                        {status}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+
+                        <label style={styles.field}>
+                            Sort Applications
+                            <select
+                                style={styles.select}
+                                value={sortOrder}
+                                onChange={(event) =>
+                                    setSortOrder(event.target.value)
+                                }
+                            >
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="company-asc">Company Name (A-Z)</option>
+                                <option value="company-desc">Company Name (Z-A)</option>
+                            </select>
+                        </label>
+                    </div>
+                        
+                    {filteredApplications.length === 0 ? (
                         <div style={styles.empty}>
-                            <p>
-                                You have no job applications yet.
-                            </p>
-                            <p>
-                                Use the form above to add your first
-                                application.
-                            </p>
-                        </div>
-                    ) : (
-                        applications.map((application) => (
-                            <article
+                            {applications.length === 0 ? (
+                                <>
+                                    <p>
+                                        You have no job applications yet.
+                                    </p>
+                                    <p>
+                                        Use the form above to add your first
+                                        application.
+                                    </p>
+                                </>
+                            ) : (
+                                <>
+                                    <p>
+                                        No applications match your search or filter.
+                                    </p>
+                                    
+                                    <button
+                                        type="button"
+                                        style={{
+                                            ...styles.button,
+                                            ...styles.secondaryButton,
+                                        }}
+                                        onClick={() => {
+                                            setSearchTerm("");
+                                            setStatusFilter("All");
+                                            setSortOrder("newest");
+                                        }}
+                                    >
+                                        Clear Search and Filters
+                                    </button>
+                                </>
+                            )}
+                            </div>
+                        ) : (
+                            filteredApplications.map((application) => (
+                                <article
                                 key={getApplicationId(application)}
                                 style={styles.applicationCard}
                             >
