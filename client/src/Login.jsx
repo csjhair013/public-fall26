@@ -90,6 +90,7 @@ export default function Login() {
         <div id="login">
             {error && (
                 <div
+                    role="alert"
                     style={{
                         background: "#fee",
                         padding: 10,
@@ -106,23 +107,55 @@ export default function Login() {
             <form onSubmit={handleLogin}>
                 <div className="controls">
                     <p>
-                        <label className={emailNotValid ? "invalid" : ""}>Email</label>
+                        <label
+                            htmlFor="login-email"
+                            className={emailNotValid ? "invalid" : ""}
+                        >
+                            Email
+                        </label>
+
                         <input
+                            id="login-email"
                             type="email"
                             value={enteredEmail}
                             className={emailNotValid ? "invalid" : ""}
                             onChange={(e) => handleInputChange("email", e.target.value)}
+                            required
+                            aria-invalid={emailNotValid}
+                            aria-describedby={emailNotValid ? "email-error" : undefined}
                         />
+
+                        {emailNotValid && (
+                            <span id="email-error" className="error-message">
+                                Please enter a valid email address.
+                            </span>
+                        )}
                     </p>
 
                     <p>
-                        <label className={passwordNotValid ? "invalid" : ""}>Password</label>
+                        <label
+                            htmlFor="login-password"
+                            className={passwordNotValid ? "invalid" : ""}
+                        >
+                            Password
+                        </label>
+                        
                         <input
+                            id="login-password"
                             type="password"
                             value={enteredPassword}
                             className={passwordNotValid ? "invalid" : ""}
                             onChange={(e) => handleInputChange("password", e.target.value)}
+                            required
+                            aria-invalid={passwordNotValid}
+                            aria-describedby={passwordNotValid ? "password-error" : undefined}
                         />
+
+                        {passwordNotValid && (
+                            <span id="password-error" className="error-message">
+                                Password must be at least 8 characters.
+                            </span>
+                        )}
                     </p>
                 </div>
 
@@ -135,7 +168,12 @@ export default function Login() {
                         Create a new account
                     </Link>
 
-                    <button className="button" type="submit" disabled={loading}>
+                    <button 
+                        className="button" 
+                        type="submit" 
+                        disabled={loading}
+                        aria-busy={loading}
+                    >
                         {loading ? "Signing in..." : "Sign In"}
                     </button>
                 </div>
