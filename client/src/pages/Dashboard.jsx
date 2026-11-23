@@ -63,7 +63,7 @@ const styles = {
     },
     subtitle: {
         margin: 0,
-        color: "#64748b",
+        color: "#243247",
     },
     button: {
         padding: "10px 16px",
@@ -633,6 +633,11 @@ function Dashboard() {
             </main>
         );
     }
+    
+    /* Accessibility: Announce search results */
+    <p role="status" aria-live="polite" aria-atomic="true">
+        Showing {filteredApplications.length} of {applications.length} applications.
+    </p>
 
     return (
         <main style={styles.page}>
@@ -1055,6 +1060,7 @@ function Dashboard() {
                                 <div style={styles.formButtons}>
                                     <button
                                         type="button"
+                                        aria-label={`Edit application for ${application.company_name}`}
                                         style={{
                                             ...styles.button,
                                             ...styles.editButton,
@@ -1068,6 +1074,7 @@ function Dashboard() {
 
                                     <button
                                         type="button"
+                                        aria-label={`Delete application for ${application.company_name}`}
                                         style={{
                                             ...styles.button,
                                             ...styles.deleteButton,
